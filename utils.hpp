@@ -50,36 +50,6 @@ void SaveVoxelGrid2SurfacePointCloud(const std::string &file_name, int voxel_gri
   fclose(fp);
 }
 
-// Load an M x N matrix from a text file (numbers delimited by spaces/tabs)
-// Return the matrix as a float vector of the matrix in row-major order
-std::vector<float> LoadMatrixFromFile(std::string filename, int M, int N) {
-  std::vector<float> matrix;
-  FILE *fp = fopen(filename.c_str(), "r");
-  for (int i = 0; i < M * N; i++) {
-    float tmp;
-    int iret = fscanf(fp, "%f", &tmp);
-    matrix.push_back(tmp);
-  }
-  fclose(fp);
-  return matrix;
-}
-
-// Read a depth image with size H x W and save the depth values (in meters) into a float array (in row-major order)
-// The depth image file is assumed to be in 16-bit PNG format, depth in millimeters
-void ReadDepth(std::string filename, int H, int W, float * depth) {
-  cv::Mat depth_mat = cv::imread(filename, CV_LOAD_IMAGE_UNCHANGED);
-  if (depth_mat.empty()) {
-    std::cout << "Error: depth image file not read!" << std::endl;
-    cv::waitKey(0);
-  }
-  for (int r = 0; r < H; ++r)
-    for (int c = 0; c < W; ++c) {
-      depth[r * W + c] = (float)(depth_mat.at<unsigned short>(r, c)) / 1000.0f;
-      if (depth[r * W + c] > 6.0f) // Only consider depth < 6m
-        depth[r * W + c] = 0;
-    }
-}
-
 // 4x4 matrix multiplication (matrices are stored as float arrays in row-major order)
 void multiply_matrix(const float m1[16], const float m2[16], float mOut[16]) {
   mOut[0]  = m1[0] * m2[0]  + m1[1] * m2[4]  + m1[2] * m2[8]   + m1[3] * m2[12];
@@ -232,7 +202,7 @@ bool invert_matrix(const float m[16], float invOut[16]) {
   return true;
 }
 
-void FatalError(const int lineNumber = 0) {
+/*void FatalError(const int lineNumber = 0) {
   std::cerr << "FatalError";
   if (lineNumber != 0) std::cerr << " at LINE " << lineNumber;
   std::cerr << ". Program Terminated." << std::endl;
@@ -245,4 +215,4 @@ void checkCUDA(const int lineNumber, cudaError_t status) {
     std::cerr << "CUDA failure at LINE " << lineNumber << ": " << status << std::endl;
     FatalError();
   }
-}
+}*/

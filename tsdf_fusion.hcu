@@ -1,0 +1,51 @@
+#include <opencv2/opencv.hpp>
+#include "geometry_msgs/msg/pose_stamped.hpp"
+
+class TSDFFusion{
+public:
+
+    TSDFFusion();
+    ~TSDFFusion();
+
+    void init();
+    void integrate_frame(cv::Mat depth_frame,  float pose[16]);
+    void export_model(std::string filename);
+    void set_intrinsics(float fx, float fy, float cx, float cy);
+
+private:
+    void cv_mat_to_array(cv::Mat depth_mat, float * depth_array);
+
+    float cam_K[3 * 3];
+    float base2world[4 * 4];
+    float cam2base[4 * 4];
+    float cam2world[4 * 4];
+    int im_width = 640;
+    int im_height = 480;
+
+    float base2world_inv[16] = {0};
+
+    // Voxel grid parameters (change these to change voxel grid resolution, etc.)
+    float voxel_grid_origin_x = -1.5f; // Location of voxel grid origin in base frame camera coordinates
+    float voxel_grid_origin_y = -1.5f;
+    float voxel_grid_origin_z = 0.5f;
+    float voxel_size = 0.006f;
+    float trunc_margin = voxel_size * 5;
+    int voxel_grid_dim_x = 500;
+    int voxel_grid_dim_y = 500;
+    int voxel_grid_dim_z = 500;
+
+    float * gpu_cam_K;
+    float * gpu_cam2base;
+    float * gpu_depth_im;
+
+    float * voxel_grid_TSDF;
+    float * voxel_grid_weight;
+
+    float * gpu_voxel_grid_TSDF;
+    float * gpu_voxel_grid_weight;
+
+    bool first_frame_transform = false;
+
+    int counter = 0;
+    
+};
